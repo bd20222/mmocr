@@ -111,14 +111,14 @@ class BaseTextDetTargets:
         for text_ind, poly in enumerate(text_polys):
             instance = poly[0].reshape(-1, 2).astype(np.int32)
             area = plg(instance).area
-            peri = cv2.arcLength(instance, True)
+            peri = cv2.arcLength(instance, True)  # 轮廓周长
             distance = min(
                 int(area * (1 - shrink_ratio * shrink_ratio) / (peri + 0.001) +
                     0.5), max_shrink)
             pco = pyclipper.PyclipperOffset()
             pco.AddPath(instance, pyclipper.JT_ROUND,
                         pyclipper.ET_CLOSEDPOLYGON)
-            shrunk = np.array(pco.Execute(-distance))
+            shrunk = np.array(pco.Execute(-distance)) # 向内缩放
 
             # check shrunk == [] or empty ndarray
             if len(shrunk) == 0 or shrunk.size == 0:

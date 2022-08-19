@@ -91,7 +91,7 @@ class ImgAug:
         # augment polygon mask
         for key in results['mask_fields']:
             if self.clip_invalid_polys:
-                masks = self.may_augment_poly(aug, shape, results[key])
+                masks = self.may_augment_poly(aug, shape, results[key]) # 增强后，多边形的点数可能会变多
                 results[key] = PolygonMasks(masks, *target_shape[:2])
             else:
                 masks = self.may_augment_poly_legacy(aug, shape, results[key])
@@ -200,19 +200,19 @@ class EastRandomCrop:
             (self.target_size[1], self.target_size[0], img.shape[2]),
             img.dtype)
         padded_img[:h, :w] = mmcv.imresize(
-            img[crop_y:crop_y + crop_h, crop_x:crop_x + crop_w], (w, h))
+            img[crop_y:crop_y + crop_h, crop_x:crop_x + crop_w], (w, h))  # 右下角 padding 0
 
         # for bboxes
-        for key in results['bbox_fields']:
+        for key in results['bbox_fields']:  # crop后的 bbox也要对应变换一下
             lines = []
             for box in results[key]:
-                box = box.reshape(2, 2)
-                poly = ((box - (crop_x, crop_y)) * scale)
+                box = box.reshape(2, 2)  # 原始的 bbox
+                poly = ((box - (crop_x, crop_y)) * scale)  # crop 之后的 bbox
                 if not self.is_poly_outside_rect(poly, 0, 0, w, h):
                     lines.append(poly.flatten())
             results[key] = np.array(lines)
         # for masks
-        for key in results['mask_fields']:
+        for key in results['mask_fields']:  # crop后的 polygons 坐标也要对应变换一下
             polys = []
             polys_label = []
             for poly in results[key]:
@@ -300,7 +300,7 @@ class EastRandomCrop:
 
         for i in range(self.max_tries):
             if len(w_regions) > 1:
-                xmin, xmax = self.region_wise_random_select(w_regions)
+                xmin, xmax = self.region_wise_random_select(w_regions) # 每个区域选一个点
             else:
                 xmin, xmax = self.random_select(w_axis, w)
             if len(h_regions) > 1:
@@ -319,7 +319,7 @@ class EastRandomCrop:
                     num_poly_in_rect += 1
                     break
 
-            if num_poly_in_rect > 0:
+            if num_poly_in_rect > 0:  # 只要有1个文本框落在 crop区域内 就算OK
                 return xmin, ymin, xmax - xmin, ymax - ymin
 
         return 0, 0, w, h

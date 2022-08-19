@@ -72,15 +72,15 @@ class DBLoss(nn.Module):
                 ]
                 mask = F.pad(mask, pad, mode='constant', value=0)
                 kernel.append(mask)
-            kernel = torch.stack(kernel)
+            kernel = torch.stack(kernel)  # [bs, H, W]
             result_tensors.append(kernel)
 
-        return result_tensors
+        return result_tensors # List of tensor, with each item size [bs, H, W] 
 
     def balance_bce_loss(self, pred, gt, mask):
 
         positive = (gt * mask)
-        negative = ((1 - gt) * mask)
+        negative = ((1 - gt) * mask) # mask是1, gt是0的区域是negative, 也就是在排除掉ignore区域前提下，不是文本的区域
         positive_count = int(positive.float().sum())
         negative_count = min(
             int(negative.float().sum()),
@@ -153,7 +153,7 @@ class DBLoss(nn.Module):
                                        gt['gt_shrink_mask'][0])
 
         loss_db = self.dice_loss(pred_db, gt['gt_shrink'][0],
-                                 gt['gt_shrink_mask'][0])
+                                 gt['gt_shrink_mask'][0])  # 只算了positive区域
         loss_thr = self.l1_thr_loss(pred_thr, gt['gt_thr'][0],
                                     gt['gt_thr_mask'][0])
 

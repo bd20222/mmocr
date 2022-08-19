@@ -15,8 +15,8 @@ test_pipeline_4068_1024 = {{_base_.test_pipeline_4068_1024}}
 load_from = 'checkpoints/textdet/dbnetpp/res50dcnv2_synthtext.pth'
 
 data = dict(
-    samples_per_gpu=32,
-    workers_per_gpu=8,
+    samples_per_gpu=2,
+    workers_per_gpu=0,
     val_dataloader=dict(samples_per_gpu=1),
     test_dataloader=dict(samples_per_gpu=1),
     train=dict(

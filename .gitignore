@@ -142,3 +142,8 @@ mmocr/.mim
 workdirs/
 .history/
 .dev/
+
+
+tests/data/icdar2015
+tests/data/medical_tickets
+tests/data/tiny_medical_tickets

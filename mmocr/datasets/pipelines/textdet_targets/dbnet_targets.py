@@ -92,7 +92,7 @@ class DBNetTargets(BaseTextDetTargets):
         results['gt_masks_ignore'].masks += [
             mask for i, mask in enumerate(results['gt_masks'].masks)
             if ignore_tags[i]
-        ]
+        ]  # 把 results['gt_masks'] 中那些对应 ignore_tags 为True的样本，追加到 results['gt_masks_ignore']中去
         results['gt_masks'].masks = [
             mask for i, mask in enumerate(results['gt_masks'].masks)
             if not ignore_tags[i]
@@ -101,7 +101,7 @@ class DBNetTargets(BaseTextDetTargets):
             mask for i, mask in enumerate(results['gt_labels'])
             if not ignore_tags[i]
         ])
-        new_ignore_tags = [ignore for ignore in ignore_tags if not ignore]
+        new_ignore_tags = [ignore for ignore in ignore_tags if not ignore]  # 肯定是全为 False
 
         return results, new_ignore_tags
 
@@ -121,7 +121,7 @@ class DBNetTargets(BaseTextDetTargets):
 
         for polygon in polygons:
             self.draw_border_map(polygon[0], thr_map, mask=thr_mask)
-        thr_map = thr_map * (self.thr_max - self.thr_min) + self.thr_min
+        thr_map = thr_map * (self.thr_max - self.thr_min) + self.thr_min # 缩放到 (thr_min, thr_max) 尺度
 
         return thr_map, thr_mask
 
@@ -145,7 +145,7 @@ class DBNetTargets(BaseTextDetTargets):
         padding = pyclipper.PyclipperOffset()
         padding.AddPath(subject, pyclipper.JT_ROUND,
                         pyclipper.ET_CLOSEDPOLYGON)
-        padded_polygon = padding.Execute(distance)
+        padded_polygon = padding.Execute(distance)  # dialation, 注意这里缩放后多边形的点数可能发生变化
         if len(padded_polygon) > 0:
             padded_polygon = np.array(padded_polygon[0])
         else:
@@ -160,7 +160,7 @@ class DBNetTargets(BaseTextDetTargets):
         width = x_max - x_min + 1
         height = y_max - y_min + 1
 
-        polygon[:, 0] = polygon[:, 0] - x_min
+        polygon[:, 0] = polygon[:, 0] - x_min  # 平移原始polygon, 以膨胀后的polygon左上角为原点
         polygon[:, 1] = polygon[:, 1] - y_min
 
         xs = np.broadcast_to(
@@ -171,12 +171,12 @@ class DBNetTargets(BaseTextDetTargets):
             (height, width))
 
         distance_map = np.zeros((polygon.shape[0], height, width),
-                                dtype=np.float32)
+                                dtype=np.float32)  # 膨胀后的多边形内每个点，到原始多边形每个点的距离
         for i in range(polygon.shape[0]):
-            j = (i + 1) % polygon.shape[0]
+            j = (i + 1) % polygon.shape[0]  # 下一个点
             absolute_distance = self.point2line(xs, ys, polygon[i], polygon[j])
-            distance_map[i] = np.clip(absolute_distance / distance, 0, 1)
-        distance_map = distance_map.min(axis=0)
+            distance_map[i] = np.clip(absolute_distance / distance, 0, 1)  # 相对距离, 并缩放到(0,1)
+        distance_map = distance_map.min(axis=0)  # 到原始多边形所有点的最小距离
 
         x_min_valid = min(max(0, x_min), canvas.shape[1] - 1)
         x_max_valid = min(max(0, x_max), canvas.shape[1] - 1)
@@ -186,14 +186,14 @@ class DBNetTargets(BaseTextDetTargets):
         if x_min_valid - x_min >= width or y_min_valid - y_min >= height:
             return
 
-        cv2.fillPoly(mask, [padded_polygon.astype(np.int32)], 1.0)
+        cv2.fillPoly(mask, [padded_polygon.astype(np.int32)], 1.0)  # mask展示的是膨胀后的多边形区域
         canvas[y_min_valid:y_max_valid + 1,
                x_min_valid:x_max_valid + 1] = np.fmax(
                    1 - distance_map[y_min_valid - y_min:y_max_valid - y_max +
                                     height, x_min_valid - x_min:x_max_valid -
                                     x_max + width],
                    canvas[y_min_valid:y_max_valid + 1,
-                          x_min_valid:x_max_valid + 1])
+                          x_min_valid:x_max_valid + 1])  # 距离越大，是边界的可能性越小，所以要1减去距离
 
     def generate_targets(self, results):
         """Generate the gt targets for DBNet.
@@ -219,16 +219,16 @@ class DBNetTargets(BaseTextDetTargets):
         gt_shrink, ignore_tags = self.generate_kernels((h, w),
                                                        polygons,
                                                        self.shrink_ratio,
-                                                       ignore_tags=ignore_tags)
+                                                       ignore_tags=ignore_tags) # shrink 后的多边形
 
         results, ignore_tags = self.ignore_texts(results, ignore_tags)
         # genenrate gt_shrink_mask
         polygons_ignore = results['gt_masks_ignore'].masks
-        gt_shrink_mask = self.generate_effective_mask((h, w), polygons_ignore)
+        gt_shrink_mask = self.generate_effective_mask((h, w), polygons_ignore) # 把需要忽略的多边形对应位置置为0
 
         # generate gt_threshold and gt_threshold_mask
         polygons = results['gt_masks'].masks
-        gt_thr, gt_thr_mask = self.generate_thr_map((h, w), polygons)
+        gt_thr, gt_thr_mask = self.generate_thr_map((h, w), polygons)  # 生成 threshold_map 和 对应的mask
 
         results['mask_fields'].clear()  # rm gt_masks encoded by polygons
         results.pop('gt_labels', None)
@@ -237,14 +237,14 @@ class DBNetTargets(BaseTextDetTargets):
         results.pop('gt_bboxes_ignore', None)
 
         mapping = {
-            'gt_shrink': gt_shrink,
-            'gt_shrink_mask': gt_shrink_mask,
-            'gt_thr': gt_thr,
-            'gt_thr_mask': gt_thr_mask
+            'gt_shrink': gt_shrink,  # 收缩后的文本区域
+            'gt_shrink_mask': gt_shrink_mask,  # 忽略具体文字的那些 文本框 对应的区域
+            'gt_thr': gt_thr,  # 生成的 threshold_map 
+            'gt_thr_mask': gt_thr_mask  # 膨胀后的区域
         }
         for key, value in mapping.items():
             value = value if isinstance(value, list) else [value]
-            results[key] = BitmapMasks(value, h, w)
+            results[key] = BitmapMasks(value, h, w)  # 每个多边形（即一个文本区域）对应一个channel
             results['mask_fields'].append(key)
 
         return results
