@@ -131,8 +131,10 @@ class ImgAug:
             poly = poly.reshape(-1, 2)
             imgaug_polys.append(imgaug.Polygon(poly))
         imgaug_polys = aug.augment_polygons(
-            [imgaug.PolygonsOnImage(imgaug_polys,
-                                    shape=img_shape)])[0].clip_out_of_image()
+                [imgaug.PolygonsOnImage(imgaug_polys, shape=img_shape)]
+            )[0]
+        imgaug_polys.polygons = [poly for poly in imgaug_polys.polygons if poly.is_valid]
+        imgaug_polys.clip_out_of_image()
 
         new_polys = []
         for poly in imgaug_polys.polygons:
