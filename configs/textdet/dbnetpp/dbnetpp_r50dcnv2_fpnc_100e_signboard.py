@@ -1,8 +1,8 @@
 _base_ = [
     '../../_base_/default_runtime.py',
-    '../../_base_/schedules/schedule_sgd_1200e.py',
+    '../../_base_/schedules/schedule_sgd_100e.py',
     '../../_base_/det_models/dbnetpp_r50dcnv2_fpnc.py',
-    '../../_base_/det_datasets/icdar2015.py',
+    '../../_base_/det_datasets/signboard.py',
     '../../_base_/det_pipelines/dbnet_pipeline.py'
 ]
 
@@ -12,10 +12,10 @@ test_list = {{_base_.test_list}}
 train_pipeline_r50dcnv2 = {{_base_.train_pipeline_r50dcnv2}}
 test_pipeline_4068_1024 = {{_base_.test_pipeline_4068_1024}}
 
-load_from = 'checkpoints/textdet/dbnetpp/res50dcnv2_synthtext.pth'
+load_from = '/project/pretrained_ckpts/textdet/dbnetpp/res50dcnv2_synthtext.pth'
 
 data = dict(
-    samples_per_gpu=32,
+    samples_per_gpu=12,
     workers_per_gpu=8,
     val_dataloader=dict(samples_per_gpu=1),
     test_dataloader=dict(samples_per_gpu=1),
@@ -33,7 +33,7 @@ data = dict(
         pipeline=test_pipeline_4068_1024))
 
 evaluation = dict(
-    interval=100,
+    interval=20,
     metric='hmean-iou',
     save_best='0_hmean-iou:hmean',
     rule='greater')
