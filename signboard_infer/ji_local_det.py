@@ -3,9 +3,8 @@
 import json
 import os
 import os.path as osp
+from PIL import Image
 import mmcv
-import glob
-import cv2
 import numpy as np
 
 from mmocr.apis import init_detector, model_inference
@@ -87,9 +86,7 @@ def save_results(result, out_dir, img_name, score_thr=0.3):
 }
 '''
 
-def init(config="/project/ev_sdk/mmocr/configs/textdet/dbnetpp/dbnetpp_r50dcnv2_fpnc_100e_signboard.py",
-         checkpoint="/project/train/models/epoch_100.pth",
-        device="cuda:0"):  # 模型初始化
+def init(config, checkpoint, device="cpu"):  # 模型初始化
     # model = Pipeline()
     model = init_detector(config, checkpoint, device=device)
     if hasattr(model, 'module'):
@@ -98,13 +95,8 @@ def init(config="/project/ev_sdk/mmocr/configs/textdet/dbnetpp/dbnetpp_r50dcnv2_
     return model
 
 
-def process_image(net, input_image, out_dir=None, args=None):
-    # mmocr 暂时只能从图片读，所以这里先临时保存到图片
-    if isinstance(input_image, np.ndarray):
-        cv2.imwrite("/tmp/mmocr_tmp_input.png", input_image)
-        input_path = "/tmp/mmocr_tmp_input.png"
-    else:
-        input_path = input_image
+def process_image(net, input_path, out_dir=None):
+    # dets = net(input_image)
 
     # result 格式为 [bboxes, filename], 
     # 其中bboxes是一个list，每个item的格式为 [x1,y1,x2,y2,x3,y3,x4,y4,confidence]
@@ -142,15 +134,27 @@ def process_image(net, input_image, out_dir=None, args=None):
     
     bboxes = []
     for bbox in result["boundary_result"]:
-        points = [round(p) for p in bbox[:8]]
+        points = bbox[:8]
         confidence = bbox[-1]
         text = ""  # TODO, bbox对应的文字，即 招牌
         
         single_bbox = {
             "points":points,
-            "confidence": confidence,
+            "conf": confidence,
             "name": text,
         }
         out_json['model_data']['objects'].append(single_bbox)
 
     return json.dumps(out_json)
+
+
+if __name__ == "__main__":
+    config = "/Users/liuzhian/PycharmProjects/mmocr/configs/textdet/dbnetpp/dbnetpp_r50dcnv2_fpnc_1200e_icdar2015.py"
+    checkpoint = "/Users/liuzhian/PycharmProjects/mmocr/checkpoints/textdet/dbnetpp/dbnetpp_r50dcnv2_fpnc_1200e_icdar2015-20220502-d7a76fff.pth"
+    device = "cpu"
+    net = init(config=config, checkpoint=checkpoint, device=device)
+
+    input_image = '/Users/liuzhian/PycharmProjects/mmocr/demo/011515_1507187602654705.jpg'
+    # input_image = np.array(Image.open(input_image).convert('RGB'))
+    output = process_image(net, input_image, out_dir="./results")
+    print(json.loads(output))

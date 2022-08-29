@@ -160,5 +160,5 @@ class PositionalEncoding(nn.Module):
             x (Tensor): Tensor of shape (batch_size, pos_len, d_hid, ...)
         """
         self.device = x.device
-        x = x + self.position_table[:, :x.size(1)].clone().detach()
+        x = x + self.position_table[:, :x.size(1)].clone().detach()  # pos_emb 的 len_max_seq 为feature map 的 H*W
         return self.dropout(x)

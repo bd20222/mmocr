@@ -2,9 +2,7 @@ _base_ = [
     '../../_base_/default_runtime.py',
     '../../_base_/schedules/schedule_adam_step_20e.py',
     '../../_base_/recog_pipelines/abinet_pipeline.py',
-    # '../../_base_/recog_datasets/ST_MJ_alphanumeric_train.py',
-    '../../_base_/recog_datasets/svt_train.py',
-    '../../_base_/recog_datasets/academic_test.py'
+    '../../_base_/recog_datasets/signboard.py',
 ]
 
 train_list = {{_base_.train_list}}
@@ -14,14 +12,15 @@ train_pipeline = {{_base_.train_pipeline}}
 test_pipeline = {{_base_.test_pipeline}}
 
 # Model
-num_chars = 37
+num_chars = 5990 + 1  # <EOS/SOS>
 max_seq_len = 26
 label_convertor = dict(
     type='ABIConvertor',
-    dict_type='DICT36',
-    with_unknown=False,
+    # dict_type='DICT36',
+    dict_file = "/Users/liuzhian/PycharmProjects/mmocr/configs/textrecog/abinet/char_std_5985.txt",
+    with_unknown=True,
     with_padding=False,
-    lower=True,
+    lower=False,
 )
 
 model = dict(
@@ -69,14 +68,14 @@ data = dict(
         type='UniformConcatDataset',
         datasets=train_list,
         pipeline=train_pipeline),
-    # val=dict(
-    #     type='UniformConcatDataset',
-    #     datasets=test_list,
-    #     pipeline=test_pipeline),
-    # test=dict(
-    #     type='UniformConcatDataset',
-    #     datasets=test_list,
-    #     pipeline=test_pipeline)
+    val=dict(
+        type='UniformConcatDataset',
+        datasets=test_list,
+        pipeline=test_pipeline),
+    test=dict(
+        type='UniformConcatDataset',
+        datasets=test_list,
+        pipeline=test_pipeline)
 )
 
-# evaluation = dict(interval=1, metric='acc')
+evaluation = dict(interval=1, metric='acc')

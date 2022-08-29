@@ -66,7 +66,7 @@ class TransformerEncoder(BaseModule):
         """
         n, c, h, w = feature.shape
         feature = feature.view(n, c, -1).transpose(1, 2)  # (n, h*w, c)
-        feature = self.pos_encoder(feature)  # (n, h*w, c)
+        feature = self.pos_encoder(feature)  # (n, h*w, c)  feature 加上 pos_embedding
         feature = feature.transpose(0, 1)  # (h*w, n, c)
         for m in self.transformer:
             feature = m(feature)
