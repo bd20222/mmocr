@@ -1,3 +1,6 @@
+## =============== 训练 text detecttion 模型 =====================
+export  HIP_VISIBLE_DEVICES=0
+
 # 删除掉已经存在的数据集
 # rm -rf /home/data/1413_coco
 
@@ -15,4 +18,6 @@ python3 mmocr/tools/data/textdet/signboard_converter.py \
 # 开始训练
 python3 mmocr/tools/train.py mmocr/configs/textdet/dbnetpp/dbnetpp_r50dcnv2_fpnc_1200e_signboard.py \
         --work-dir=../models
+
+
     
