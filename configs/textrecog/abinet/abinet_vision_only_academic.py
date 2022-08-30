@@ -2,8 +2,8 @@ _base_ = [
     '../../_base_/default_runtime.py',
     '../../_base_/schedules/schedule_adam_step_20e.py',
     '../../_base_/recog_pipelines/abinet_pipeline.py',
-    # '../../_base_/recog_datasets/ST_MJ_alphanumeric_train.py',
-    '../../_base_/recog_datasets/svt_train.py',
+    '../../_base_/recog_datasets/ST_MJ_alphanumeric_train.py',
+    # '../../_base_/recog_datasets/svt_train.py',
     '../../_base_/recog_datasets/academic_test.py'
 ]
 
@@ -69,14 +69,14 @@ data = dict(
         type='UniformConcatDataset',
         datasets=train_list,
         pipeline=train_pipeline),
-    # val=dict(
-    #     type='UniformConcatDataset',
-    #     datasets=test_list,
-    #     pipeline=test_pipeline),
-    # test=dict(
-    #     type='UniformConcatDataset',
-    #     datasets=test_list,
-    #     pipeline=test_pipeline)
+    val=dict(
+        type='UniformConcatDataset',
+        datasets=test_list,
+        pipeline=test_pipeline),
+    test=dict(
+        type='UniformConcatDataset',
+        datasets=test_list,
+        pipeline=test_pipeline)
 )
 
-# evaluation = dict(interval=1, metric='acc')
+evaluation = dict(interval=1, metric='acc')

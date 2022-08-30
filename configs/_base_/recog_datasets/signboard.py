@@ -1,6 +1,6 @@
 # Text Recognition for signboard dataset
 
-data_root = '/Users/liuzhian/datasets/sample_data'
+data_root = '/home/liuzhian/hdd4T/datasets/sample_data'
 
 train = dict(
     type='OCRDataset',

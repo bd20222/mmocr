@@ -17,7 +17,8 @@ max_seq_len = 26
 label_convertor = dict(
     type='ABIConvertor',
     # dict_type='DICT36',
-    dict_file = "/Users/liuzhian/PycharmProjects/mmocr/configs/textrecog/abinet/char_std_5985.txt",
+    # dict_file = "/Users/liuzhian/PycharmProjects/mmocr/configs/textrecog/abinet/char_std_5985.txt",
+    dict_file = "/home/liuzhian/hdd4T/code/mmocr/configs/textrecog/abinet/char_std_5985.txt",
     with_unknown=True,
     with_padding=False,
     lower=False,
@@ -60,7 +61,7 @@ model = dict(
     iter_size=1)
 
 data = dict(
-    samples_per_gpu=192,
+    samples_per_gpu=32,
     workers_per_gpu=8,
     val_dataloader=dict(samples_per_gpu=1),
     test_dataloader=dict(samples_per_gpu=1),
@@ -78,4 +79,4 @@ data = dict(
         pipeline=test_pipeline)
 )
 
-evaluation = dict(interval=1, metric='acc')
+evaluation = dict(interval=10, metric='acc')
